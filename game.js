@@ -159,12 +159,23 @@ class Game {
       setTimeout(() => loadingEl.style.display = 'none', 500);
     }
 
-    // Focus canvas so keyboard input works immediately without requiring a click
-    this.canvas.focus();
-    document.addEventListener('click', () => this.canvas.focus());
-
-    this.state = STATE.PLAYING;
-    this._startLoop();
+    // Show "Click to Play" overlay — this guarantees browser focus + user activation
+    const startOverlay = document.getElementById('startOverlay');
+    if (startOverlay) {
+      startOverlay.style.display = 'flex';
+      const begin = () => {
+        startOverlay.style.display = 'none';
+        this.canvas.focus();
+        this.state = STATE.PLAYING;
+        this._startLoop();
+        startOverlay.removeEventListener('click', begin);
+      };
+      startOverlay.addEventListener('click', begin);
+    } else {
+      this.canvas.focus();
+      this.state = STATE.PLAYING;
+      this._startLoop();
+    }
   }
 
   // ─── Game Loop ───────────────────────────────────────────────────────────────
@@ -437,6 +448,5 @@ class Game {
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  window._game = new Game();
-});
+// Module scripts are deferred by default — DOM is ready when this runs
+window._game = new Game();
