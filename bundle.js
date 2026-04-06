@@ -2846,27 +2846,19 @@
       this.canvas.height = window.innerHeight;
     }
     _setupInput() {
-      const onKeyDown = (e) => {
-        if (!this.keys[e.code]) this.keys[e.code] = true;
+      window.addEventListener("keydown", (e) => {
+        this.keys[e.code] = true;
         if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space"].includes(e.code)) e.preventDefault();
         if (this.ui) this.ui.handleKeyDown(e);
         if (e.code === "Escape") this._handleEsc();
         if (e.code === "KeyF") this._toggleFullscreen();
         if (e.code === "KeyR" && this.state === STATE.DEAD) this._respawn();
-        if (e.code === "Equal" && this.renderer) {
-          this.renderer.blockSize = Math.min(64, this.renderer.blockSize + 4);
-        }
-        if (e.code === "Minus" && this.renderer) {
-          this.renderer.blockSize = Math.max(16, this.renderer.blockSize - 4);
-        }
-      };
-      const onKeyUp = (e) => {
+        if (e.code === "Equal" && this.renderer) this.renderer.blockSize = Math.min(64, this.renderer.blockSize + 4);
+        if (e.code === "Minus" && this.renderer) this.renderer.blockSize = Math.max(16, this.renderer.blockSize - 4);
+      }, true);
+      window.addEventListener("keyup", (e) => {
         this.keys[e.code] = false;
-      };
-      document.addEventListener("keydown", onKeyDown);
-      document.addEventListener("keyup", onKeyUp);
-      this.canvas.addEventListener("keydown", onKeyDown);
-      this.canvas.addEventListener("keyup", onKeyUp);
+      }, true);
       this.canvas.addEventListener("mousemove", (e) => {
         this.mouse.x = e.clientX;
         this.mouse.y = e.clientY;
@@ -2950,22 +2942,8 @@
         loadingEl.style.opacity = "0";
         setTimeout(() => loadingEl.style.display = "none", 500);
       }
-      const startOverlay = document.getElementById("startOverlay");
-      if (startOverlay) {
-        startOverlay.style.display = "flex";
-        const begin = () => {
-          startOverlay.style.display = "none";
-          this.canvas.focus();
-          this.state = STATE.PLAYING;
-          this._startLoop();
-          startOverlay.removeEventListener("click", begin);
-        };
-        startOverlay.addEventListener("click", begin);
-      } else {
-        this.canvas.focus();
-        this.state = STATE.PLAYING;
-        this._startLoop();
-      }
+      this.state = STATE.PLAYING;
+      this._startLoop();
     }
     // ─── Game Loop ───────────────────────────────────────────────────────────────
     _startLoop() {
