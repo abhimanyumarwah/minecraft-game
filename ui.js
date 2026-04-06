@@ -147,9 +147,6 @@ export class UI {
       ctx.fillText(this.player.flying ? '✦ CREATIVE · FLYING' : '✦ CREATIVE MODE', 10, 68);
     }
 
-    // ── Mode buttons (top-right) ───────────────────────────────────────────
-    this._drawModeButtons(ctx, W);
-
     // ── Inventory screen ───────────────────────────────────────────────────
     if (this.isInventoryOpen) {
       this._drawInventory(ctx, W, H);

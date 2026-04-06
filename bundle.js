@@ -2104,7 +2104,6 @@
         ctx.fillStyle = "#7AFF4A";
         ctx.fillText(this.player.flying ? "\u2726 CREATIVE \xB7 FLYING" : "\u2726 CREATIVE MODE", 10, 68);
       }
-      this._drawModeButtons(ctx, W);
       if (this.isInventoryOpen) {
         this._drawInventory(ctx, W, H);
       }
