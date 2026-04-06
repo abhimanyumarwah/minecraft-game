@@ -39,22 +39,26 @@ class Game {
   }
 
   _setupInput() {
-    document.addEventListener('keydown', e => {
+    const onKeyDown = e => {
       if (!this.keys[e.code]) this.keys[e.code] = true;
       if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)) e.preventDefault();
       if (this.ui) this.ui.handleKeyDown(e);
       if (e.code === 'Escape') this._handleEsc();
       if (e.code === 'KeyF') this._toggleFullscreen();
       if (e.code === 'KeyR' && this.state === STATE.DEAD) this._respawn();
-      // Zoom
       if (e.code === 'Equal' && this.renderer) {
         this.renderer.blockSize = Math.min(64, this.renderer.blockSize + 4);
       }
       if (e.code === 'Minus' && this.renderer) {
         this.renderer.blockSize = Math.max(16, this.renderer.blockSize - 4);
       }
-    });
-    document.addEventListener('keyup', e => { this.keys[e.code] = false; });
+    };
+    const onKeyUp = e => { this.keys[e.code] = false; };
+    // Listen on both document and canvas to capture input regardless of what has focus
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+    this.canvas.addEventListener('keydown', onKeyDown);
+    this.canvas.addEventListener('keyup', onKeyUp);
 
     this.canvas.addEventListener('mousemove', e => {
       this.mouse.x = e.clientX;
@@ -154,6 +158,10 @@ class Game {
       loadingEl.style.opacity = '0';
       setTimeout(() => loadingEl.style.display = 'none', 500);
     }
+
+    // Focus canvas so keyboard input works immediately without requiring a click
+    this.canvas.focus();
+    document.addEventListener('click', () => this.canvas.focus());
 
     this.state = STATE.PLAYING;
     this._startLoop();
