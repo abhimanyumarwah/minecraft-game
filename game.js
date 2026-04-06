@@ -41,6 +41,7 @@ class Game {
   _setupInput() {
     document.addEventListener('keydown', e => {
       if (!this.keys[e.code]) this.keys[e.code] = true;
+      if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)) e.preventDefault();
       if (this.ui) this.ui.handleKeyDown(e);
       if (e.code === 'Escape') this._handleEsc();
       if (e.code === 'KeyF') this._toggleFullscreen();
