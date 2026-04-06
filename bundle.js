@@ -2104,6 +2104,37 @@
         ctx.fillStyle = "#7AFF4A";
         ctx.fillText(this.player.flying ? "\u2726 CREATIVE \xB7 FLYING" : "\u2726 CREATIVE MODE", 10, 68);
       }
+      const btnW = 120, btnH = 22, btnX = W - btnW - 8;
+      ctx.fillStyle = this.player.creativeMode ? "rgba(50,120,50,0.85)" : "rgba(50,50,80,0.85)";
+      ctx.strokeStyle = this.player.creativeMode ? "#7AFF4A" : "#888";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(btnX, 8, btnW, btnH, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = this.player.creativeMode ? "#7AFF4A" : "#CCC";
+      ctx.font = "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`[M] ${this.player.creativeMode ? "Creative" : "Survival"}`, btnX + btnW / 2, 23);
+      ctx.fillStyle = "rgba(40,40,60,0.85)";
+      ctx.strokeStyle = "#888";
+      ctx.beginPath();
+      ctx.roundRect(btnX, 34, btnW, btnH, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#AAA";
+      ctx.fillText("[N] New World", btnX + btnW / 2, 49);
+      if (this.player.creativeMode) {
+        ctx.fillStyle = "rgba(40,60,40,0.85)";
+        ctx.strokeStyle = "#7AFF4A";
+        ctx.beginPath();
+        ctx.roundRect(btnX, 60, btnW, btnH, 4);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#7AFF4A";
+        ctx.fillText("[C] Block Palette", btnX + btnW / 2, 75);
+      }
+      ctx.textAlign = "left";
       if (this.isInventoryOpen) {
         this._drawInventory(ctx, W, H);
       }
@@ -2129,6 +2160,118 @@
         ctx.fillStyle = "#FFF";
         ctx.fillText(this.tooltipText, tx + 6, ty + 14);
       }
+    }
+    _drawEnvSelector(ctx, W, H) {
+      const ENVS = {
+        mixed: { name: "Mixed World", desc: "All biomes, caves, ores", color: "#5D9E1F" },
+        grasslands: { name: "Grasslands", desc: "Rolling green hills", color: "#7DB83A" },
+        forest: { name: "Dense Forest", desc: "Thick trees everywhere", color: "#2D7D27" },
+        desert: { name: "Desert", desc: "Sand dunes, no water", color: "#F0D87A" },
+        snowy: { name: "Tundra", desc: "Snow-covered icy world", color: "#E8EAEC" },
+        ocean: { name: "Ocean World", desc: "Vast seas with islands", color: "#2D5DA1" },
+        caves: { name: "Cave World", desc: "Underground huge caverns", color: "#3B3B3B" },
+        flat: { name: "Superflat", desc: "Perfectly flat grass world", color: "#AC8A56" }
+      };
+      const CARD_W = 185, CARD_H = 58, COLS = 2, ROWS = 4, GAP = 10;
+      const panelW = COLS * CARD_W + (COLS + 1) * GAP;
+      const panelH = ROWS * CARD_H + (ROWS + 1) * GAP + 56;
+      const px2 = Math.round((W - panelW) / 2);
+      const py = Math.round((H - panelH) / 2);
+      ctx.fillStyle = "rgba(0,0,0,0.72)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(18,18,28,0.97)";
+      ctx.strokeStyle = "#555";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(px2, py, panelW, panelH, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#FFF";
+      ctx.font = "bold 17px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("Choose World Type", W / 2, py + 32);
+      ctx.fillStyle = "#666";
+      ctx.font = "11px monospace";
+      ctx.fillText("\u26A0 Starting a new world resets your current world", W / 2, py + 48);
+      ctx.textAlign = "left";
+      const keys = Object.keys(ENVS);
+      this._envCardRects = [];
+      keys.forEach((key, i) => {
+        const col = i % COLS;
+        const row = Math.floor(i / COLS);
+        const cx = px2 + GAP + col * (CARD_W + GAP);
+        const cy = py + 56 + GAP + row * (CARD_H + GAP);
+        const env = ENVS[key];
+        const hover = this.mouseX >= cx && this.mouseX < cx + CARD_W && this.mouseY >= cy && this.mouseY < cy + CARD_H;
+        this._envCardRects.push({ key, x: cx, y: cy, w: CARD_W, h: CARD_H });
+        ctx.fillStyle = hover ? "rgba(70,70,100,0.95)" : "rgba(35,35,50,0.95)";
+        ctx.strokeStyle = hover ? "#FFD700" : "#444";
+        ctx.lineWidth = hover ? 2 : 1;
+        ctx.beginPath();
+        ctx.roundRect(cx, cy, CARD_W, CARD_H, 5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = env.color;
+        ctx.beginPath();
+        ctx.roundRect(cx + 8, cy + 8, 40, CARD_H - 16, 4);
+        ctx.fill();
+        ctx.fillStyle = hover ? "#FFD700" : "#FFF";
+        ctx.font = "bold 13px monospace";
+        ctx.fillText(env.name, cx + 56, cy + 23);
+        ctx.fillStyle = "#999";
+        ctx.font = "11px monospace";
+        ctx.fillText(env.desc, cx + 56, cy + 40);
+      });
+      ctx.fillStyle = "#555";
+      ctx.font = "11px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("[N] or [ESC] to cancel", W / 2, py + panelH - 10);
+      ctx.textAlign = "left";
+    }
+    _drawCreativePalette(ctx, W, H) {
+      const COLS = 4, ROWS = 5, CELL = 52, GAP = 6;
+      const panelW = COLS * CELL + (COLS + 1) * GAP + 16;
+      const panelH = ROWS * CELL + (ROWS + 1) * GAP + 50;
+      const px2 = W - panelW - 10;
+      const py = Math.round((H - panelH) / 2);
+      ctx.fillStyle = "rgba(18,18,28,0.96)";
+      ctx.strokeStyle = "#555";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(px2, py, panelW, panelH, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#7AFF4A";
+      ctx.font = "bold 13px monospace";
+      ctx.fillText("Block Palette", px2 + 10, py + 20);
+      ctx.fillStyle = "#666";
+      ctx.font = "11px monospace";
+      ctx.fillText("Click \u2192 hotbar slot", px2 + 10, py + 34);
+      this._paletteRects = [];
+      CREATIVE_BLOCKS.forEach((bid, i) => {
+        const col = i % COLS;
+        const row = Math.floor(i / COLS);
+        const cx = px2 + 8 + GAP + col * (CELL + GAP);
+        const cy = py + 44 + GAP + row * (CELL + GAP);
+        const hover = this.mouseX >= cx && this.mouseX < cx + CELL && this.mouseY >= cy && this.mouseY < cy + CELL;
+        this._paletteRects.push({ bid, x: cx, y: cy, w: CELL, h: CELL });
+        ctx.fillStyle = hover ? "rgba(80,80,110,0.95)" : "rgba(35,35,50,0.95)";
+        ctx.strokeStyle = hover ? "#FFD700" : "#444";
+        ctx.lineWidth = hover ? 2 : 1;
+        ctx.beginPath();
+        ctx.roundRect(cx, cy, CELL, CELL, 3);
+        ctx.fill();
+        ctx.stroke();
+        drawBlock(ctx, bid, cx + 4, cy + 4, CELL - 8, 0);
+        if (hover) {
+          this.tooltipText = getItemName(bid);
+          this.tooltipX = cx;
+          this.tooltipY = cy;
+        }
+      });
+      ctx.fillStyle = "#555";
+      ctx.font = "11px monospace";
+      ctx.fillText("[C] Close", px2 + 10, py + panelH - 8);
     }
     _drawHotbar(ctx, W, H) {
       const inv = this.inventory;
@@ -2329,6 +2472,30 @@
     }
     // ─── Input Handling ──────────────────────────────────────────────────────────
     handleClick(screenX, screenY, button) {
+      if (this.isEnvSelectorOpen) {
+        if (this._envCardRects) {
+          for (const card of this._envCardRects) {
+            if (screenX >= card.x && screenX < card.x + card.w && screenY >= card.y && screenY < card.y + card.h) {
+              this.isEnvSelectorOpen = false;
+              if (this.onEnvironmentChange) this.onEnvironmentChange(card.key);
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      if (this.isCreativePaletteOpen) {
+        if (this._paletteRects) {
+          for (const p of this._paletteRects) {
+            if (screenX >= p.x && screenX < p.x + p.w && screenY >= p.y && screenY < p.y + p.h) {
+              this.inventory.slots[this.inventory.selectedSlot] = new ItemStack(p.bid, 64);
+              this.isCreativePaletteOpen = false;
+              return true;
+            }
+          }
+        }
+        return false;
+      }
       if (!this.isInventoryOpen) return false;
       const is3x3 = this.isCraftingTableOpen;
       const gridSize = is3x3 ? 3 : 2;
@@ -2422,6 +2589,16 @@
         this.inventory.selectedSlot = parseInt(key) - 1;
       }
       if (e.code === "KeyE") this.toggleInventory();
+      if (e.code === "KeyN") this.toggleEnvSelector();
+      if (e.code === "KeyM") {
+        if (this.player) {
+          this.player.creativeMode = !this.player.creativeMode;
+          if (!this.player.creativeMode) this.isCreativePaletteOpen = false;
+        }
+      }
+      if (e.code === "KeyC") {
+        if (this.player && this.player.creativeMode) this.toggleCreativePalette();
+      }
     }
     handleScroll(delta) {
       if (this.isInventoryOpen) return;
@@ -2933,6 +3110,7 @@
       this.renderer = new Renderer(this.canvas, this.world, this.player);
       this.ui = new UI(this.canvas, this.inventory, this.player);
       this.entityManager = new EntityManager(this.world);
+      this.ui.onEnvironmentChange = (preset) => this._restartWithPreset(preset);
       this.renderer.camX = this.player.x;
       this.renderer.camY = this.player.y + this.player.height / 2;
       this._loadGame();
@@ -3020,10 +3198,11 @@
           }
         }
       }
-      if (this.mouse.justDown[0] && this.ui.isInventoryOpen) {
+      const uiOpen = this.ui.isInventoryOpen || this.ui.isEnvSelectorOpen || this.ui.isCreativePaletteOpen;
+      if (this.mouse.justDown[0] && uiOpen) {
         this.ui.handleClick(this.mouse.x, this.mouse.y, 0);
       }
-      if (this.mouse.justDown[2] && this.ui.isInventoryOpen) {
+      if (this.mouse.justDown[2] && uiOpen) {
         this.ui.handleClick(this.mouse.x, this.mouse.y, 2);
       }
       this.entityManager.update(dt, this.player, this.timeOfDay);
@@ -3109,6 +3288,54 @@
     _respawn() {
       this.player.respawn();
       this.player.inventory = this.inventory;
+      this.state = STATE.PLAYING;
+    }
+    // ─── World Restart ───────────────────────────────────────────────────────────
+    async _restartWithPreset(preset) {
+      this.state = STATE.LOADING;
+      localStorage.removeItem("mc2d_save");
+      const loadingEl = document.getElementById("loadingScreen");
+      const progressEl = document.getElementById("progressFill");
+      const statusEl = document.getElementById("loadingStatus");
+      if (loadingEl) {
+        loadingEl.style.transition = "";
+        loadingEl.style.opacity = "1";
+        loadingEl.style.display = "flex";
+      }
+      if (progressEl) progressEl.style.width = "0%";
+      const seed = Math.floor(Math.random() * 999999);
+      this.world = new World(seed);
+      this.player.world = this.world;
+      this.renderer.world = this.world;
+      this.entityManager = new EntityManager(this.world);
+      const gen = this.world.generateGenerator(preset);
+      let done = false;
+      while (!done) {
+        const result = gen.next();
+        if (result.done) {
+          done = true;
+          break;
+        }
+        const pct = result.value;
+        if (progressEl) progressEl.style.width = `${Math.round(pct * 100)}%`;
+        if (statusEl) {
+          if (pct < 0.1) statusEl.textContent = "Generating terrain\u2026";
+          else if (pct < 0.35) statusEl.textContent = "Placing blocks\u2026";
+          else if (pct < 0.5) statusEl.textContent = "Carving caves\u2026";
+          else if (pct < 0.65) statusEl.textContent = "Placing ores\u2026";
+          else if (pct < 0.75) statusEl.textContent = "Growing trees\u2026";
+          else statusEl.textContent = "Computing lighting\u2026";
+        }
+        await new Promise((r) => setTimeout(r, 0));
+      }
+      this.player.respawn();
+      this.renderer.camX = this.player.x;
+      this.renderer.camY = this.player.y + this.player.height / 2;
+      if (loadingEl) {
+        loadingEl.style.transition = "opacity 0.5s";
+        loadingEl.style.opacity = "0";
+        setTimeout(() => loadingEl.style.display = "none", 500);
+      }
       this.state = STATE.PLAYING;
     }
     // ─── Save / Load ─────────────────────────────────────────────────────────────

@@ -136,6 +136,7 @@ class Game {
     this.renderer = new Renderer(this.canvas, this.world, this.player);
     this.ui = new UI(this.canvas, this.inventory, this.player);
     this.entityManager = new EntityManager(this.world);
+    this.ui.onEnvironmentChange = (preset) => this._restartWithPreset(preset);
 
     // Camera starts at player
     this.renderer.camX = this.player.x;
@@ -258,11 +259,12 @@ class Game {
       }
     }
 
-    // Inventory interaction
-    if (this.mouse.justDown[0] && this.ui.isInventoryOpen) {
+    // UI panel interaction (inventory, env selector, creative palette)
+    const uiOpen = this.ui.isInventoryOpen || this.ui.isEnvSelectorOpen || this.ui.isCreativePaletteOpen;
+    if (this.mouse.justDown[0] && uiOpen) {
       this.ui.handleClick(this.mouse.x, this.mouse.y, 0);
     }
-    if (this.mouse.justDown[2] && this.ui.isInventoryOpen) {
+    if (this.mouse.justDown[2] && uiOpen) {
       this.ui.handleClick(this.mouse.x, this.mouse.y, 2);
     }
 
@@ -370,6 +372,58 @@ class Game {
   _respawn() {
     this.player.respawn();
     this.player.inventory = this.inventory;
+    this.state = STATE.PLAYING;
+  }
+
+  // ─── World Restart ───────────────────────────────────────────────────────────
+  async _restartWithPreset(preset) {
+    this.state = STATE.LOADING;
+    localStorage.removeItem('mc2d_save');
+
+    // Show loading screen
+    const loadingEl = document.getElementById('loadingScreen');
+    const progressEl = document.getElementById('progressFill');
+    const statusEl   = document.getElementById('loadingStatus');
+    if (loadingEl) {
+      loadingEl.style.transition = '';
+      loadingEl.style.opacity = '1';
+      loadingEl.style.display = 'flex';
+    }
+    if (progressEl) progressEl.style.width = '0%';
+
+    const seed = Math.floor(Math.random() * 999999);
+    this.world = new World(seed);
+    this.player.world = this.world;
+    this.renderer.world = this.world;
+    this.entityManager = new EntityManager(this.world);
+
+    const gen = this.world.generateGenerator(preset);
+    let done = false;
+    while (!done) {
+      const result = gen.next();
+      if (result.done) { done = true; break; }
+      const pct = result.value;
+      if (progressEl) progressEl.style.width = `${Math.round(pct * 100)}%`;
+      if (statusEl) {
+        if (pct < 0.1) statusEl.textContent = 'Generating terrain…';
+        else if (pct < 0.35) statusEl.textContent = 'Placing blocks…';
+        else if (pct < 0.5) statusEl.textContent = 'Carving caves…';
+        else if (pct < 0.65) statusEl.textContent = 'Placing ores…';
+        else if (pct < 0.75) statusEl.textContent = 'Growing trees…';
+        else statusEl.textContent = 'Computing lighting…';
+      }
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    this.player.respawn();
+    this.renderer.camX = this.player.x;
+    this.renderer.camY = this.player.y + this.player.height / 2;
+
+    if (loadingEl) {
+      loadingEl.style.transition = 'opacity 0.5s';
+      loadingEl.style.opacity = '0';
+      setTimeout(() => loadingEl.style.display = 'none', 500);
+    }
     this.state = STATE.PLAYING;
   }
 
