@@ -400,6 +400,7 @@ class Game {
   _saveGame() {
     try {
       const data = {
+        version: 2,
         world: this.world.serialize(),
         player: this.player.serialize(),
         inventory: this.inventory.serialize(),
@@ -421,6 +422,11 @@ class Game {
       const raw = localStorage.getItem('mc2d_save');
       if (!raw) return;
       const data = JSON.parse(raw);
+      // Clear saves from old versions to avoid corrupted state
+      if (!data.version || data.version < 2) {
+        localStorage.removeItem('mc2d_save');
+        return;
+      }
       // Restore world blocks
       const binary = atob(data.world.blocks);
       data.world.blocks = Array.from(binary, c => c.charCodeAt(0));

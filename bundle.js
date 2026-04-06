@@ -1702,7 +1702,6 @@
           }
         }
       }
-      this._drawPlayer(ctx);
       for (const e of entities) {
         const sp = this.worldToScreen(e.x, e.y + e.height);
         if (sp.x > -100 && sp.x < W + 100) {
@@ -1710,6 +1709,7 @@
         }
       }
       this._drawLighting(ctx, x1, y1, x2, y2, timeOfDay);
+      this._drawPlayer(ctx);
       this._tickParticles(ctx, 1 / 60);
       const le = this.worldToScreen(0, 0);
       const re = this.worldToScreen(WORLD_WIDTH, 0);
@@ -3138,6 +3138,7 @@
     _saveGame() {
       try {
         const data = {
+          version: 2,
           world: this.world.serialize(),
           player: this.player.serialize(),
           inventory: this.inventory.serialize(),
@@ -3157,6 +3158,10 @@
         const raw = localStorage.getItem("mc2d_save");
         if (!raw) return;
         const data = JSON.parse(raw);
+        if (!data.version || data.version < 2) {
+          localStorage.removeItem("mc2d_save");
+          return;
+        }
         const binary = atob(data.world.blocks);
         data.world.blocks = Array.from(binary, (c) => c.charCodeAt(0));
         const loadedWorld = World.deserialize(data.world);

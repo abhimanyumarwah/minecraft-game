@@ -139,9 +139,6 @@ export class Renderer {
       }
     }
 
-    // Player
-    this._drawPlayer(ctx);
-
     // Entities
     for (const e of entities) {
       const sp = this.worldToScreen(e.x, e.y + e.height);
@@ -152,6 +149,9 @@ export class Renderer {
 
     // Lighting overlay
     this._drawLighting(ctx, x1, y1, x2, y2, timeOfDay);
+
+    // Player drawn AFTER lighting so they're always visible
+    this._drawPlayer(ctx);
 
     // Particles
     this._tickParticles(ctx, 1 / 60);
