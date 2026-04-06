@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D Minecraft</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: monospace;
+      user-select: none;
+    }
+
+    #gameCanvas {
+      display: block;
+      cursor: crosshair;
+      image-rendering: pixelated;
+    }
+
+    /* ── Loading Screen ─────────────────────────────────────────────────── */
+    #loadingScreen {
+      position: fixed;
+      inset: 0;
+      background: #1A1A2E;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #loadingScreen .title {
+      font-size: 52px;
+      font-weight: bold;
+      color: #FFF;
+      text-shadow:
+        4px 4px 0 #555,
+        -2px -2px 0 #333;
+      letter-spacing: 4px;
+      margin-bottom: 16px;
+    }
+
+    #loadingScreen .subtitle {
+      font-size: 18px;
+      color: #7DB83A;
+      margin-bottom: 48px;
+      letter-spacing: 2px;
+    }
+
+    #loadingScreen .progress-bar {
+      width: 400px;
+      height: 22px;
+      background: #222;
+      border: 2px solid #555;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    #progressFill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #4CAF50 0%, #7DB83A 100%);
+      transition: width 0.1s ease;
+      border-radius: 1px;
+    }
+
+    #loadingStatus {
+      font-size: 14px;
+      color: #AAA;
+      letter-spacing: 1px;
+    }
+
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+      100% { content: ''; }
+    }
+
+    #loadingScreen .grass-strip {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .grass-block {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .grass-block .top { width: 100%; height: 12px; background: #5D9E1F; }
+    .grass-block .side { width: 100%; height: 36px; background: #7B5C3A; }
+    .grass-block .side::before {
+      content: '';
+      display: block;
+      height: 4px;
+      width: 100%;
+      background: #5D9E1F;
+    }
+
+    .tip {
+      color: #666;
+      font-size: 12px;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="loadingScreen">
+    <div class="title">2D Minecraft</div>
+    <div class="subtitle">A New World Awaits</div>
+
+    <div class="progress-bar">
+      <div id="progressFill"></div>
+    </div>
+    <div id="loadingStatus" class="loading-dots">Initializing</div>
+
+    <div class="tip">Tip: Press E to open your inventory · Right-click a Crafting Table to craft · Torches emit light in caves</div>
+
+    <!-- Decorative grass strip -->
+    <div class="grass-strip" id="grassStrip"></div>
+  </div>
+
+  <script>
+    // Populate grass strip decoration
+    const strip = document.getElementById('grassStrip');
+    if (strip) {
+      const count = Math.ceil(window.innerWidth / 48) + 1;
+      for (let i = 0; i < count; i++) {
+        const block = document.createElement('div');
+        block.className = 'grass-block';
+        block.innerHTML = '<div class="top"></div><div class="side"></div>';
+        strip.appendChild(block);
+      }
+    }
+  </script>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>
