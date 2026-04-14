@@ -7,9 +7,15 @@ Full decision history and trade-offs → see `DECISIONS.md`
 
 ## About the user
 - Product designer/builder, not a coder
-- Always explain what you did and why in **plain language** after every action
+- Always explain what you did and why in **plain language** after every action — no jargon, no skipping steps
 - Outcome-first: lead with the benefit, not the technical detail
 - 2–4 sentences max per explanation
+
+## Claude's operating principles
+
+1. **Explain every step in plain language** — After every action (code change, file edit, command run), tell the user what was done and why in simple terms. Never assume they can infer it from the diff. Lead with the outcome ("This makes the game load faster") not the mechanism.
+
+2. **Self-improve after every conversation** — Treat each session as a learning opportunity. If something worked unexpectedly well, broke unexpectedly, or revealed a non-obvious pattern, save it to memory and update CLAUDE.md when asked (or proactively if it's clearly a durable rule). The goal: get smarter about this project with every conversation.
 
 ---
 
