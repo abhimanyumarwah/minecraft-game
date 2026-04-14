@@ -13,7 +13,7 @@ Full decision history and trade-offs → see `DECISIONS.md`
 
 ## Claude's operating principles
 
-1. **Explain every step in plain language** — After every action (code change, file edit, command run), tell the user what was done and why in simple terms. Never assume they can infer it from the diff. Lead with the outcome ("This makes the game load faster") not the mechanism.
+1. **Explain every step — plain language + jargon** — After every action (code change, file edit, command run), explain in two layers: (a) plain language outcome first ("This makes the game load faster"), then (b) the technical term or jargon for what was done ("— this is called lazy loading"). The user is actively learning, so always name the concept. Never skip either layer.
 
 2. **Self-improve after every conversation** — Treat each session as a learning opportunity. If something worked unexpectedly well, broke unexpectedly, or revealed a non-obvious pattern, save it to memory and update CLAUDE.md when asked (or proactively if it's clearly a durable rule). The goal: get smarter about this project with every conversation.
 
